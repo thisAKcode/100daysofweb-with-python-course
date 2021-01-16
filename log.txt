@@ -1,0 +1,613 @@
+Day 1 
+
+installed flask into venv 
+set up flask create application directory hierarchy 
+as per Julians best practice we need to package our Flask application // alternative to that
+is to create a simple Flask app with a single file.
+
+# Setup your Flask app as a package
+`mkdir program` 
+dundername denotes that is a package: 1-flask/program/__init__.py. Inside of it there is rules. 
+bulk (heaviest mass) of our application lives in 1-flask/program/ it does creates all the web pages all the links.   
+```
+from flask import Flask
+
+app = Flask(__name__)
+# we are setting our app Flask instance  
+from program import routes
+```
+
+Every time you navigate to a different webpage, your browser is making 
+a request to the web server. Thanks to routing, the server knows exactly 
+which endpoint should handle the request and can return the correct HTML 
+page to display.
+
+functions should be named similar to url that is why 
+```
+@app.route('/index')
+def index():
+   pass 
+```
+
+demo.py file configuration
+We are telling to flask what to do. run your Flask app.     
+
+Through environment variable tell Flask to use demo.py.
+in linux 
+```
+export FLASK_APP=demo.py  
+```
+on windows `set FLASK_APP=demo.py`
+
+
+New concepts: scalable application, ...
+_____________________________________________________________________
+
+Day 2 
+
+
+troubleshooting of error ' Could not locate a Flask application.'
+
+Other foldes going to pop up as we continue.You did not provide the "FLASK_APP" environment variable
+`env | grep FLASK_APP` isn't working once I close terminal window
+this means we loose FLASK_APP=demo.py
+`flask run` is not working because it doesn't know which file it has to talk to = running nothing  
+
+WORKAROUNT FOR ENV VAR 
+
+	install a new package into venv 'python-dotenv'
+
+this module allow us to specify environment variable in a environment file 
+
+`vim .flaskenv`
+now `flask run` refers to that .flaskenv file 
+
+
+====================
+create template to do it flashy
+template  is html file that links to each of these urls.
+
+I do not want to code html into routes.py file 
+
+instead `mkdir templates`
+
+# create the base.html
+
+for more intresting site create template around it, which gives a common theme
+example of left hand bar requires a base template. and things next to left hand bar on unique page are referred
+to the other unique html file
+
+following code is a static template across every webpage on our site.
+```
+<html>
+	<head>
+	<title>This is our title</title>
+	</head>
+
+	<body>
+
+	</body>
+</html>
+```
+
+## what differs? well everything within the body tag.    
+```
+<body>
+{% block content %}{% endblock %}
+</body>
+``` 
+Then everything that calls on this base HTML template is going to have `block content` tag. 
+
+exteding corefile base.html into index.html file
+
+
+base.html file is being used by index.html and 
+
+100 days also pulls from the same base.html
+
+
+same template is being pulled over every time.
+
+# create another page 100days.html
+in Jinja template you are extending base = we are taking format from the 
+base.html file 
+``` 
+{% extends "base.html" %}
+
+{% block content %}
+
+{% endblock %}
+
+```
+we need to edit route.py file cause 100days.html page created here need route.  
+```
+from program import app
+from flask import render_template
+
+@app.route('/')
+@app.route('/index')
+def index():
+    return render_template('index.html') 
+
+# TO DO set up route for a new url.
+```
+One thing is that head of page was from base.html
+to workaround that you can try to see how to create as many web pages
+as you want within flask templates.
+
+right now you are having 
+```   
+100Days.html  base.html  index.html
+```
+all of your page can call on that one base.html for the 
+overall architechture of your page.
+
+
+----------------------------------------------------------
+some theory from codecademy.com
+Flask is a Python framework for developing web applications.
+microframework: minimal built-in components and requirements
+
+it is designed to be easily extensible.
+As such, Flask is capable of creating both simple static websites 
+as well as more complex apps that involve database integration, 
+accounts and authentication, and more!
+Dummy apps looks like that. Julian choose to import routes from external py file.
+```
+# necessary to create the main application object
+from flask import Flask
+
+# instance of the Flask class
+app = Flask(__name__) # working with a single module, use the variable __name__.
+
+'''
+if we run app.py script directly, in the terminal, 
+    __name__ == '__main__'.
+elif app.py is being imported as a module into another_script.py
+    __name__ ==  'another_script.py'
+'''
+
+
+================================================================
+routing 
+
+
+
+In our Flask app, we can create endpoints to handle the various requests. 
+Requests from different URLs can be directed to different endpoints in a 
+process called routing.
+
+route() decorator can be used to bind one or more static URLs to a view function.
+
+# to do define view function
+
+# decorator bind a URL to the view function, 
+# decorator makes the function to be triggered when the URL is visited:
+#  the URL path passed as parameter to route '/'
+@app.route('/') 
+def home():
+    return 'Hello, World!'
+    #contains the code for processing the request and generating a response.
+    # here response is simply a string of text
+
+
+Multiple URLs can also be bound to the same view function:
+@app.route('/')
+@app.route('/home')
+def home():
+    return 'Hello, World!'
+```
+Now, both http//localhost:5000/ and http://localhost:5000/home will display Hello, World!.
+
+
+
+==========================================================================
+
+Day 3 
+Render html continue
+
+# Render HTML
+The response except text and data also return HTML to be rendered on a webpage
+In the viewer below you put hello world as <h1> heading.
+```python 
+@app.route('/home')
+def home():
+    return '<h1>Hello, World!</h1>'
+```
+Another viewer function return text content as a <h2> heading. 
+
+
+## create link
+
+add an <a> tag with the text Return to home page that links back to http://localhost:5000/
+
+The syntax for creating an <a> element is: 
+`<a href="/path/to/page">Link Text</a>`
+
+## Variable Rules 
+route() bind one or more static URLs to a view function.
+
+if you got to handle a set of URLs that may be constantly changing:
+    # use variable rules to allow for dynamic URLs.
+    # <variable_name> is a section of a path to be replaced by actual value
+    # These variable parts will then be passed to the view function as arguments.
+
+```
+@app.route('/orders/<user_name>/<int:order_id>')
+def orders(user_name, order_id):
+    return f'<p>Fetching order #{order_id} for {user_name}.</p>'
+# notice f-string
+```
+return f'''
+    <h2>Reporter {my_variable_here} Bio</h2>
+    <a href="/">Return to home page</a>
+    '''
+```
+
+# URLs like '/orders/alex/1' and '/orders/kajsa/777' can all be handled by the orders() function.
+```
+### Enforce the type of the variable 
+`
+`<converter:variable_name>` 
+Converter types are: int, float, path, uuid.
+
+TODO
+reporter endpoint has to handle requests from individual reporter pages whose URL path follows the pattern 
+'/reporter/#'
+
+```
+@app.route('/reporter/<int:reporter_id>')
+```
+
+TODO 
+set a parameter called reporter_id to viewer function.
+modify the <h2> heading to read Reporter # Bio, where # is the reporter_id.
+```
+@app.route('/reporter/<int:reporter_id>')
+def reporter(reporter_id):
+    return f'''
+    <h2>Reporter {reporter_id} Bio</h2>
+    <a href="/">Return to home page</a>
+    ''' 
+```
+
+```
+@app.route('/article/<path:article_name>')
+def article(article_name):
+  return f'''
+  <h2>{article_name.replace('-', ' ').title()}</h2>
+  <a href = "/"> Return back to home page </a>'''
+```
+
+'''
+Which of the following code will display Posts tagged with X 
+when the user visits /tagged/X, where X could be any tag.
+'''
+
+
+recap: 
+add Flask App Object
+Running Flask App
+Creating a Route
+Returning HTML From Route
+Variable Rules <converter:variable_name>. 
+
+Jinja2 Templates and Forms
+render_template Function
+Template Variables
+Template Variable Filters
+Template if Statements
+Template for Loops
+Template Inheritance
+
+----------------------------------
+Day 4 Jinja2
+repetitive rendering tasks
+
+Jinja2 template engine to render HTML
+Tool that supports an organized and growth oriented application.
+
+Leverage control structures within our templates
+Share common elements across many templates
+
+
+Containing our HTML in files(templates) id better approach to structuring 
+the web app.
+``` 
+from flask import Flask, render_template
+render_template("my_template.html") # my_template.html beter off to say index.html
+@app.route("/")
+def index():
+    return render_template("my_template.html") # index.html is a better name
+``` 
+by Jinja2 functionality generate HTML using the template file as blueprint.
+
+render_template() looks for templates inside a directory called `templates`.
+```
+files
+templates
+    fried_egg.html
+    index.html
+app.py
+```
+
+### Template Variables
+
+Being able to pass data to template files is how we can begin to accomplish
+this goal. 
+```
+# add keyword arguments to be used as variables within the template.
+
+flask_variable = "Text for my template"
+ 
+render_template("my_template.html", 
+                 template_variable=flask_variable)
+# several variables
+render_template("my_template.html", 
+                template_var1="A string!", 
+                template_var2=100)
+```
+
+To access the variables in our templates we need to use the expression delimiter: 
+`{{ template_variable }}`.
+can be used inline with text and alongside HTML elements.
+`<h1>My Heading: {{ template_variable }}</h1>`
+Certain operations can be performed inside expression delimiters {{ }}
+`<p>Template number plus ten: {{ template_variable + 10 }}</p>`
+List and dictionary elements can be accessed individually inside the expression delimiters
+```
+template_list = ["A", "B", "C"]
+
+<p>Element at index 1: {{ template_list[1] }}</p>
+
+``` 
+
+replaced the fried_egg.html with recipe.html to get  
+one template for many web pages
+
+# Variable Filters
+
+Filters are used by the template engine to act on template variables.
+
+Syntax
+follow the variable with the filter name inside the delimiter and 
+separate them with the | character.
+
+`{{ variable | filter_name }}`
+
+The filter title acts on a string variable and capitalizes the first letter 
+in every word.
+
+```
+template_heading = "my very interesting website"
+{{ template_heading |  title }}
+OUTPUT
+My Very Interesting Website
+# Filters can also take arguments.
+{{ no_template_variable | default("I am not from a variable.") }}
+OUTPUT
+I am not from a variable.
+```.
+
+Jinja2 documentation can give more info but commonly applied filters are:
+
+    title
+    capitalize
+    lower/uppercase
+    int/float
+    default
+    length
+    dictsort
+
+# If Statements with ooperators `<, >, <=, >=, ==, !=`
+Including conditionals such as if and if/else statements in our templates
+allows us to control how data is handled.
+Remember the default filter doesn’t work in this situation so an if statement 
+is needed.
+```
+{% if condition %}
+  <p>This text will output if condition is True</p> 
+{% endif %}
+
+{% if template_variable == "Hello" %}
+  <p>{{template_variable}}, World!</p> 
+{% endif %}
+```
+The `{% else %}` and `{% elif %}` delimiters can be included to create 
+multi-branch if statements.
+```
+template_number = 20
+
+{% if template_number < 20 %}
+  <p>{{ template_number }} is less than 20.</p> 
+{% elif template_number > 20 %}
+   <p>{{ template_number }} is greater than 20.</p> 
+{% else %}
+   <p>{{ template_number }} is equal to 20.</p> 
+{% endif %}
+ 
+OUTPUT
+20 is equal to 20.
+``` 
+
+
+In recipe.html we have 2 paragraphs for our description. We want one paragraph 
+to output template_description and the other to output a default statement.
+
+TO DO 
+Start by surrounding BOTH paragraphs with an if statement that tests the 
+variable on its own.
+
+Remember testing a variable on its own will be False if it is an empty string 
+or is NoneType. 
+
+```
+<!DOCTYPE html>
+<html>
+  <body>
+    <a href="/">Back To Recipe List</a>
+    <h1>{{ template_recipe | title }}</h1>
+    <!-- Insert description if statement here -->
+    
+    <p>{{ template_description }}</p>
+    <!-- Include else here -->
+
+    <p>A {{ template_recipe }} recipe.</p>
+    <!-- Be sure to close with an endif block -->
+    
+    <h3>Ingredients - {{ template_ingredients | length}}</h3>
+    <ul>
+      <li>{{ template_ingredients[0] }}</li>
+      <li>{{ template_ingredients[1] }}</li>
+      <!-- Insert ingredient if statement -->
+    
+      <li>{{ template_ingredients[2] }}</li>
+      <!-- Be sure to close with an endif block -->
+      
+    </ul>
+    <h3>Instructions</h3>
+    <ol>
+      <li>{{ template_instructions | dictsort }}</li>
+    </ol>
+  </body>
+</html>
+```
+
+# For Loops
+
+Repetitive tasks are standard in most computer applications and template 
+rendering is no different.
+
+Creating lists, tables or a group of images are all repetitive tasks that 
+can be solved using for loops. 
+
+for loops step through a range of numbers, lists and dictionaries. 
+
+```
+<ol>
+{% for x in range(3) %}
+  <li>{{ x }}</li>
+{% endfor%}
+</ol>
+ 
+OUTPUT
+1. 0
+2. 1
+3. 2
+```
+The following are a few more applications of a for loop.
+
+terate through a list variable:
+
+{% for element in template_list %}
+
+Iterate through a string:
+
+{% for char_in_string in “Hello!” %}
+
+Iterate through the keys of a dictionary variable:
+
+{% for key in template_dict %}
+
+Iterate through keys AND values of a dictionary with items():
+
+
+
+```
+{% for key, value in template_dict.items() %}
+
+
+      {% for ingredient in template_ingredients %}
+      <li>{{ ingredient }}</li> 
+      {% endfor%}
+
+      
+    </ul>
+    <h3>Instructions</h3>
+    <ul>
+    {% for key, instruction in template_instructions|dictsort %}
+      <!-- Add the correct dictionary element to list 
+      the instructions -->
+      <p> {{key}}: {{ instruction }}</p>
+    {% endfor %}
+```
+
+```
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Cooking By Myself</h1>
+    <p>Welcome to my cookbook. These are recipes I like.</p>
+    <!-- Implement a for loop using `template_recipes`-->
+    {% for id, name in template_recipes.items() %}
+    <p><a href="/recipe/{{ id }}">{{name}}</a></p>
+    {% endfor %}
+  </body>
+</html>
+```
+
+# Inheritance
+
+If you go to any website you may notice certain elements exist across 
+different web pages. 
+
+The navigation bar is a good example of a common page element.
+No matter what page you’re on the navigation bar is there. 
+Imagine having separate files for each web page and wanting to make a change 
+to the navigation bar. Would you have to change the content of every template 
+of the site?
+
+Template files are used to share content across multiple templates. 
+```<!-- base.html-->
+<html>
+  <head>
+    <title>MY WEBSITE</title>
+  </head>
+  <body>
+  {% block content %}{% endblock %}
+  </body>
+</html>
+```
+
+To inherit base.html content in another template we will use the extends
+ statement. 
+The code to be substituted should then be surrounded by 
+`{%block content%}` and `{%endblock%}`. All together:
+
+```<!-- index.html-->
+{% extends "base.html"  %}
+ 
+{% block content %}
+    <p>This is my paragraph for this page.</p>
+{% endblock %}
+```
+when you look at the base.html and at the index.html you nocitce that code below
+is common in both. and should be deleted from index.html and base.html 
+and put into base.html
+
+```
+<!DOCTYPE html>
+<html>
+  <body>
+ 
+  </body>
+</html>
+```
+
+inside body
+```
+<div>
+  <a href="/">Recipes</a>
+   | 
+  <a href="/about">About</a>
+</div>
+```
+
+
+    Created a file structure that works with the Jinja2 template engine
+    Rendered pages in our browser using files called templates
+    Shared our application data for use within templates
+    Applied filters to our data within our templates
+    Utilized if statements to bring decision making to our templates
+    Implemented for loops to perform repetitive tasks in our templates
+    Moved common content to separate files to be shared by many templates

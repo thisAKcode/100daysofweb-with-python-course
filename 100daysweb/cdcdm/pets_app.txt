@@ -1,0 +1,146 @@
+Description 
+
+[{'name': 'Spot', 
+'age': 2, 
+'breed': 'Dalmatian', 
+'description': 'Spot is an energetic puppy who seeks fun and adventure!', 
+'url': 'https://content.codecademy.com/programs/flask/introduction-to-flask/dog-spot.jpeg'}, 
+{'name': 'Shadow', 
+'age': 4, 
+'breed': 
+'Border Collie', 
+'description': 'Eager and curious, Shadow enjoys company and can always be found tagging along at your heels!', 
+'url': 'https://content.codecademy.com/programs/flask/introduction-to-flask/dog-shadow.jpeg'}]
+
+
+
+you browse through the categories of animals and select the one you’re interested in, 
+which brings you to another page that contains a list of available pets. Then, you continue
+ your search by further clicking on an individual pet to view its profile page.
+
+# TO DO
+Right after the <h1> element, add a <p> element that contains the text 
+Browse through the links below to find your new furry friend:
+
+
+create an unordered list using <ul>. The bulleted list should contain three items: 
+Dogs, Cats, and Rabbits. Remember to use <li>
+
+turn each bulleted list item into a link by adding an <a> element within each <li> element:
+
+    Dogs should link to '/animals/dogs'
+    Cats should link to '/animals/cats'
+    Rabbits should link to '/animals/rabbits'
+
+
+
+from helper import pets
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+  return f'''<h1> Adopt a Pet! </h1>
+  <p>Browse through the links below to find your new furry friend:
+  <ul> <li><a href = '/animals/dogs'>Dogs</a></li>
+       <li><a href = '/animals/cats'>Cats</a></li>
+       <li><a href = '/animals/rabbits'>Rabbits</a></li>
+  </ul>'''
+
+
+
+# ANIMAL ROUTE
+
+create individual pages for each animal type and link them in the bulleted list. 
+TO DO 
+To do that, we’ll add a new animals route.
+In the function body, create a string containing 
+an <h1> element with the text List of pets, 
+and assign it to the variable html. Return html from the function.
+
+URL pattern '/animals/X', where X is a variable section of the URL. 
+Name the variable part pet_type
+
+parameter pet_type. In the function body, modify the <h1> heading to read List of X,
+ where X is pet_type
+
+You can access the appropriate list of pets in the pets dictionary by the key, 
+pet_type. Inside the loop, create a <li> element for each pet’s name and concatenate 
+the string to html
+
+concatenate the opening <ul> tag to html before the loop and the closing </ul> 
+tag after the loop, such that the <li> elements would be nested inside the <ul> element.
+
+Populate page content
+
+
+@app.route('/animals/<pet_type>')
+def animals(pet_type):
+
+  html = f'''<ul><h1>List of {pet_type}</h1>'''
+  for index, value in enumerate(pets):
+    elem = value[pet_type]
+    print(elem)
+    html + f'<li><a href = '/animals/{pet_type}/{index}'> {elem}</a></li>'
+  
+  return html + '</ul>'
+
+# manage profile page
+@app.route('/animals/<pet_type>/<pet_id>')
+def pet(pet_type, pet_id):
+  pet = pets[pet_type]
+  dict_elem = pets[pet_id]
+  return f'''<h1><img src="url_path" />pets</h1>'''
+
+
+
+
+
+========================================
+Final code
+
+from helper import pets
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+  return f'''<h1> Adopt a Pet! </h1>
+  <p>Browse through the links below to find your new furry friend:
+  <ul> <li><a href = '/animals/dogs'>Dogs</a></li>
+       <li><a href = '/animals/cats'>Cats</a></li>
+       <li><a href = '/animals/rabbits'>Rabbits</a></li>
+  </ul>'''
+
+@app.route('/animals/<pet_type>')
+def animals(pet_type):
+  pet_type_elem =  pets[pet_type]
+  html = f'''<h1>List of {pet_type}</h1>'''
+  html_add = ''
+  for index, pet in enumerate(pet_type_elem):
+      name_n = pet["name"]
+      list_elem = f'''<li><a href = '/animals/{pet_type}/{index}'> {name_n}</a></li>'''
+      html_add += list_elem
+  
+  return html + '<p><ul>' + html_add + '</p></ul>'
+
+# manage profile page
+@app.route('/animals/<pet_type>/<int:pet_id>')
+def pet(pet_type, pet_id):
+  pet = (pets[pet_type])[pet_id]
+  pet_name = pet['name']
+  img_path = pet['url']
+  breed = pet['breed']
+  age = pet['age']
+  description = pet['description']
+  return f'''
+  <h1>{pet_name}</h1>
+  <img src = {img_path} />
+  <p>{description}</p>
+  <ul>
+  <li>{breed}</li>
+  <li>age: {age}</li>
+  </ul>
+  
+
+
